@@ -9,6 +9,11 @@ public class GameManager : MonoBehaviour
     public GameObject donglePrefab;
     public Transform dongleGroup;
 
+    void Awake()
+    {
+        Application.targetFrameRate = 60;
+    }
+
     void Start()
     {
         NextDongle();
@@ -24,7 +29,8 @@ public class GameManager : MonoBehaviour
     {
         Dongle newDongle = Getdongle();
         lastDongle = newDongle;
-
+        lastDongle.level = Random.Range(0, 2);
+        lastDongle.gameObject.SetActive(true);
         StartCoroutine(WaitNext());
     }
 

@@ -5,12 +5,23 @@ using UnityEngine;
 public class Dongle : MonoBehaviour
 {
 
+    public int level;
     public bool isDrag;
-    private Rigidbody2D rigidbody;
+    public bool isMerge;
+    Rigidbody2D rigid;
+    Animator anim;
+    CircleCollider2D circle;
 
-    private void Awake()
+    void Awake()
     {
-        rigidbody = GetComponent<Rigidbody2D>();
+        rigid = GetComponent<Rigidbody2D>();
+        anim = GetComponent<Animator>();
+        circle = GetComponent<CircleCollider2D>();
+    }
+
+    void OnEnable()
+    {
+        anim.SetInteger("Level", level);
     }
 
     void Start()
@@ -49,13 +60,66 @@ public class Dongle : MonoBehaviour
     public void Drage()
     {
         isDrag = true;
-        rigidbody.simulated = false;
+        rigid.simulated = false;
 
     }
 
     public void Drop()
     {
         isDrag = false;
-        rigidbody.simulated = true;
+        rigid.simulated = true;
+    }
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        if (collision.gameObject.tag == "Dongle")
+        {
+            Dongle other = collision.gameObject.GetComponent<Dongle>();
+
+            if (level == other.level && !isMerge && !other.isMerge && level < 7)
+            {
+                // Merge
+                float meX = transform.position.x;
+                float meY = transform.position.y;
+                float otherX = other.transform.position.x;
+                float otherY = other.transform.position.y;
+
+                if (meY < otherY || (meY == otherY && meX > otherX))
+                {
+                    other.Hide(transform.position);
+                }
+
+
+            }
+        }
+    }
+
+    public void Hide(Vector3 targetPos)
+    {
+        isMerge = true;
+
+        // 물리효과 제거
+        rigid.simulated = false;
+        circle.enabled = false;
+
+        StartCoroutine(HideRoutine(targetPos));
+    }
+
+    IEnumerator HideRoutine(Vector3 targetPos)
+    {
+
+        int framecount = 0;
+
+        while (framecount < 20)
+        {
+            framecount++;
+            transform.position = Vector3.Lerp(transform.position, targetPos, 0.5f);
+            yield return null;
+        }
+
+        yield return null;
+
+        isMerge = false;
+        gameObject.SetActive(false);
     }
 }
