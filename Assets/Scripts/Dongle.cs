@@ -5,12 +5,14 @@ using UnityEngine;
 public class Dongle : MonoBehaviour
 {
 
+    public GameManager manager;
     public int level;
     public bool isDrag;
     public bool isMerge;
     Rigidbody2D rigid;
     Animator anim;
     CircleCollider2D circle;
+
 
     void Awake()
     {
@@ -87,6 +89,7 @@ public class Dongle : MonoBehaviour
                 if (meY < otherY || (meY == otherY && meX > otherX))
                 {
                     other.Hide(transform.position);
+                    LevelUp();
                 }
 
 
@@ -98,7 +101,6 @@ public class Dongle : MonoBehaviour
     {
         isMerge = true;
 
-        // 물리효과 제거
         rigid.simulated = false;
         circle.enabled = false;
 
@@ -121,5 +123,27 @@ public class Dongle : MonoBehaviour
 
         isMerge = false;
         gameObject.SetActive(false);
+    }
+
+    void LevelUp()
+    {
+        isMerge = true;
+
+        rigid.velocity = Vector2.zero;
+        rigid.angularVelocity = 0f;
+
+        StartCoroutine(LevelUpRoutione());
+    }
+    IEnumerator LevelUpRoutione()
+    {
+        yield return new WaitForSeconds(0.2f);
+
+        anim.SetInteger("Level", level + 1);
+        yield return new WaitForSeconds(0.3f);
+        level++;
+
+        manager.maxLevel = Mathf.Max(level, manager.maxLevel);
+        isMerge = false;
+
     }
 }
